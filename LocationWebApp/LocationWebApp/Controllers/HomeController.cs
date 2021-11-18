@@ -20,7 +20,7 @@ namespace LocationWebApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "Map", null);
         }
 
         public IActionResult Privacy()

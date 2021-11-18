@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace LocationWebApp
@@ -24,6 +25,15 @@ namespace LocationWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddHttpClient("API", c =>
+            {
+                c.BaseAddress = new Uri("http://localhost:8081/api/");
+            });
+
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
