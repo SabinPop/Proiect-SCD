@@ -23,7 +23,7 @@ namespace LocationAPI.Services
             if (location == null)
                 return false;
             context.Locations.Add(location);
-            context.SaveChangesAsync();
+            context.SaveChanges();
             return true;
         }
 
@@ -33,7 +33,7 @@ namespace LocationAPI.Services
             if (location == null)
                 return false;
             context.Locations.Remove(location);
-            context.SaveChangesAsync();
+            context.SaveChanges();
             return true;
         }
 
@@ -62,7 +62,7 @@ namespace LocationAPI.Services
             context.Entry(location).State = EntityState.Modified;
             try
             {
-                context.SaveChangesAsync();
+                context.SaveChanges();
                 return true;
             }
             catch (Exception)
