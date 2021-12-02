@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/latitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:clickable="false"
+        android:contextClickable="true"
+        android:text="Latitude:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/latitude_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/latitude"
+        android:layout_marginStart="16dp"
+        android:layout_toEndOf="@+id/latitude"
+        android:contextClickable="true"
+        android:cursorVisible="true"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/latitude"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:contextClickable="true"
+        android:text="Longitude:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/longitude_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/longitude"
+        android:layout_marginStart="16dp"
+        android:layout_toEndOf="@+id/longitude"
+        android:contextClickable="true"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/deviceId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/longitude"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:contextClickable="true"
+        android:text="Terminal ID:"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/deviceId_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/deviceId"
+        android:layout_marginStart="16dp"
+        android:layout_toEndOf="@+id/longitude"
+        android:contextClickable="true"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="270dp"
+        android:layout_marginEnd="100dp"
+        android:text="Send current location" />
+
+</RelativeLayout>
