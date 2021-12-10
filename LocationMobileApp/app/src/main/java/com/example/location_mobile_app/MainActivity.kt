@@ -1,17 +1,18 @@
 package com.example.location_mobile_app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.gson.Gson
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private val client = OkHttpClient()
 
+    @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -50,31 +52,45 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun sendPostRequest(location: Location){
-        val url = "http://192.168.100.5:8081/api/Location/create"
+    private fun sendPostRequest(location: Location) {
+        var isOnSuccess = false
+        val url = "https://scd-location-api.azurewebsites.net/api/Location/create"
         val gson = Gson()
         val json = gson.toJson(location)
         println(json)
 
-        var request = Request.Builder().url(url)
+        val request = Request.Builder().url(url)
             .post(json.toRequestBody("application/json".toMediaType()))
             .build()
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful){
-                println("ERROR!!!!!")
-                throw IOException("Unexpected code $response")
+        try {
+            client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        isOnSuccess = false
+                    }
+                    isOnSuccess = true
+                }
+        }
+        catch (ex: IOException){
+            ex.printStackTrace()
+        }
+        finally {
+            this@MainActivity.runOnUiThread {
+                Toast.makeText(
+                    this@MainActivity,
+                    if (isOnSuccess) "Location sent to server" else "Server unreachable",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
             }
-            println(response.body!!.string())
         }
     }
 
     private fun setButtonListener(button: Button){
         button.setOnClickListener{
-            Toast.makeText(this@MainActivity, "Button clicked", Toast.LENGTH_SHORT).show()
             Thread {
+                Looper.prepare()
                 sendPostRequest(locationObject)
             }.start()
-
         }
     }
 
@@ -85,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         locationRequest.interval = 10000
         locationRequest.fastestInterval = 10000
         locationRequest.smallestDisplacement = 10f // 10 m
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY //set according to your app function
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -94,8 +110,8 @@ class MainActivity : AppCompatActivity() {
                     // get latest location
                     val location =
                         locationResult.lastLocation
-                    // use your location object
-                    // get latitude , longitude and other info from this
+                    // use location object
+                    // get latitude , longitude
                     latitude.text = location.latitude.toString()
                     longitude.text = location.longitude.toString()
                     locationObject = Location(location.latitude, location.longitude, terminalId)

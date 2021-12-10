@@ -30,7 +30,7 @@ namespace LocationWebApp
 
             services.AddHttpClient("API", c =>
             {
-                c.BaseAddress = new Uri("http://localhost:8081/api/");
+                c.BaseAddress = new Uri("https://scd-location-api.azurewebsites.net/api/");
             });
 
             services.AddRazorPages();
