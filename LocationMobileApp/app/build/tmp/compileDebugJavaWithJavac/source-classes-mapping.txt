@@ -1,0 +1,2 @@
+com/example/location_mobile_app/BuildConfig.java
+ com.example.location_mobile_app.BuildConfig

@@ -1,0 +1,217 @@
+﻿@using System.Net.Http
+@using Newtonsoft.Json
+@inject IHttpClientFactory httpClientFactory
+@{
+    ViewData["Title"] = "Map";
+
+    HttpClient httpClient = httpClientFactory.CreateClient("API");
+    httpClient.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+    string locations = await GetLocations(httpClient);
+
+    string API_Key = "AIzaSyAoiUw7aCI7LhNP1qz3LeDR6dKPKeMsWXA";
+
+}
+<div id="iframe-contents">
+    <div id="map">
+
+    </div>
+</div>
+<div id="marker-details">
+
+</div>
+
+<div id="card-container">
+    <div class="card mt-4 card-margin">
+        <div class="card-header">
+            <h3 id="card-header-text"></h3>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title" id="card-title-text"></h4>
+            <p class="card-text" id="card-body-text"></p>
+            <a href="#" target="_blank" class="btn btn-primary" id="card-link">Get Directions</a>
+        </div>
+        <div class="card-footer text-muted" id="card-footer-text">
+
+        </div>
+    </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=@API_Key&callback=initMap&v=weekly"
+        async></script>
+
+@functions {
+    public async Task<string> GetLocations(HttpClient httpClient)
+    {
+        var request = await httpClient.GetAsync("location/all");
+        if (request.IsSuccessStatusCode)
+        {
+            return await request.Content.ReadAsStringAsync();
+        }
+        return "";
+    }
+}
+
+@section Scripts {
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+
+    <script>
+        const locations = JSON.parse('@Html.Raw(locations)');
+
+        const cardHeaderText = document.getElementById("card-header-text");
+        const cardTitleText = document.getElementById("card-title-text");
+        const cardBodyText = document.getElementById("card-body-text");
+        const cardLink = document.getElementById("card-link");
+        const cardFooterText = document.getElementById("card-footer-text");
+        const card = {
+            htmlElement: document.getElementById("card-container"),
+            cardHeaderText,
+            cardTitleText,
+            cardBodyText,
+            cardLink,
+            cardFooterText,
+            changeComponentText: function (cardComponent, text) {
+                changeText(cardComponent, text);
+            }
+        };
+
+
+        var markers = [];
+
+        $(document).ready(function () {
+            $("#main").attr("class", "w-100")
+        });
+
+        $(document).mouseup(function (e) {
+            var container = $(".card");
+            if (!container.is(e.target) &&
+                container.has(e.target).length === 0) {
+                $('#card-container').fadeOut(400);
+            }
+        });
+
+        function initMap() {
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 4,
+                center: { lat: locations[0].latitude, lng: locations[0].longitude }
+            });
+            const infowindow = new google.maps.InfoWindow();
+
+
+
+            for (var i = 0; i < locations.length; i++) {
+                var location = locations[i];
+                //console.log(location);
+
+
+                const marker = new google.maps.Marker({
+                    position: { lat: locations[i].latitude, lng: locations[i].longitude },
+                    map,
+                    title: locations[i].terminalId,
+                    location: location
+                });
+                marker.addListener("click", () => markerClick(marker, map, infowindow));
+                markers[i] = marker;
+            }
+        }
+
+        function markerClick(marker, map, infowindow) {
+            console.log(marker.location);
+            populateCard(marker.location);
+            geocodeLatLng(map, infowindow, marker, changeText);
+            map.setZoom(7);
+            map.setCenter(marker.getPosition());
+            //populate card with location data and show
+            //populateCard(location);
+            $('#card-container').fadeIn(400);
+        }
+
+        function populateCard(location) {
+            card.changeComponentText(card.cardHeaderText, location.terminalId);
+           // card.changeComponentText(card.cardTitleText, formatted_address);
+            cardLink.setAttribute("href", "https://maps.google.com/?saddr=My%20Location&daddr=" + location.latitude + "," + location.longitude);
+            card.changeComponentText(card.cardBodyText, "lat:" + location.latitude + ";long:" + location.longitude);
+            var dateTime = new Date(location.dateTime);
+            card.changeComponentText(card.cardFooterText, dateTime.toLocaleDateString() + "; " + dateTime.toLocaleTimeString());
+
+        }
+
+        function geocodeLatLng(map, infowindow, marker, callback) {
+            const latlng = marker.position;
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location: latlng }).then((response) => {
+                    if (response.results[0]) {
+                        map.setZoom(10);
+                        callback(document.getElementById("card-title-text"), response.results[0].formatted_address);
+                        infowindow.setContent(response.results[0].formatted_address);
+                        infowindow.open(map, marker);
+                    } else {
+                        formatted_address = "Unknown";
+                        window.alert("No results found");
+                    }
+                })
+                .catch((e) => window.alert("Geocoder failed due to: " + e));
+        }
+
+
+        function changeText(component, text) {
+            component.innerText = '';
+            component.appendChild(document.createTextNode(text));
+        }
+
+    </script>
+}
+
+@section Styles {
+    <style>
+
+        #main {
+            height: 100%;
+        }
+
+        #container-main {
+            height: 85%;
+        }
+
+        #main, #container-main{
+            
+            width:100%!important;
+            max-width: 100%!important;
+        }
+
+        #card-container {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            display: none;
+        }
+
+        .card-margin {
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+
+        #iframe-contents {
+            min-height: 300px;
+            height: 100%;
+            margin-bottom: 10%;
+            overflow: auto;
+        }
+
+        /* Always set the map height explicitly to define the size of the div
+        * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+}
